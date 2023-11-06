@@ -1,0 +1,1 @@
+const CACHED_ITEMS = 'CACHED_ITEMS';
