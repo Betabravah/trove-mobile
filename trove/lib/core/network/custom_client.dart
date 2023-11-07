@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+
 
 typedef KeyValue = Map<String, dynamic>;
 typedef Headers = Map<String, String>;
@@ -48,13 +52,63 @@ class CustomClient {
   }
 
   Future<http.Response> delete(String relativeUrl,
-      {required KeyValue body, Headers headers = const {}}) async {
+      {Headers headers = const {}}) async {
     Headers headersWithAuth = {
       ...headers,
       if (_authToken != null) 'Authorization': 'Bearer $_authToken'
     };
 
     return client.delete(Uri.parse('$baseUrl$relativeUrl'),
-        body: body, headers: headersWithAuth);
+        headers: headersWithAuth);
   }
+
+  Future<http.StreamedResponse> multipartRequest(String relativeUrl,
+      {required String method,
+      required KeyValue body,
+      Headers headers = const {}}) async {
+    Headers headersWithAuth = {
+      ...headers,
+      if (_authToken != null) 'Authorization': 'Bearer $_authToken'
+    };
+
+    final request = http.MultipartRequest(method, Uri.parse('$baseUrl$relativeUrl'))
+      ..headers.addAll(headersWithAuth);
+
+      _setRequestData(request, body);
+
+      final streamedResponse = await request.send();
+
+    return streamedResponse;
+
+  }
+
+
+  void _setRequestData(http.MultipartRequest request, KeyValue body) async {
+    for (final entry in body.entries) {
+      // handles fields with string values
+      if (entry.value is String) {
+        request.fields.addAll({entry.key: entry.value});
+      }
+
+      // handles fields with list values
+      else if (entry.value is List<String>) {
+        for (final item in entry.value) {
+          request.files
+              .add(http.MultipartFile.fromString(entry.key, item as String));
+        }
+      }
+
+      // handles files
+      else if (entry.value is File) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            entry.key,
+            entry.value.path,
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
+      }
+    }
+  }
+
 }
