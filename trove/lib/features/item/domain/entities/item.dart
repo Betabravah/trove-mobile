@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:trove/features/item/data/models/item_model.dart';
 
 class Item extends Equatable {
   final String id;
@@ -36,4 +37,18 @@ class Item extends Equatable {
         rating,
         distance,
       ];
+
+  ItemModel toItemModel() {
+    return ItemModel(
+      id: id,
+      name: name,
+      description: description,
+      imageUrl: imageUrl,
+      retailer: retailer,
+      status: status,
+      price: price,
+      rating: rating,
+      distance: distance,
+    );
+  }
 }
