@@ -7,7 +7,7 @@ import 'package:trove/features/item/data/datasources/remote/remote_datasource.da
 import 'package:trove/features/item/data/models/dto/create_item_dto.dart';
 import 'package:trove/features/item/data/models/item_model.dart';
 
-class RemoteDataSourceImpl implements RemoteDatasource {
+class RemoteDataSourceImpl implements ItemRemoteDataSource {
   final CustomClient client;
 
   RemoteDataSourceImpl({required this.client});
